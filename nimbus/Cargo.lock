@@ -841,7 +841,7 @@ dependencies = [
  "uniffi_build",
  "url",
  "uuid",
- "viaduct",
+ "viaduct 0.1.0 (git+https://github.com/mozilla/application-services?rev=1c4dd52e61324eb124ba41cfbb56dcbc6b930d9f)",
  "viaduct-reqwest",
 ]
 
@@ -1698,6 +1698,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "viaduct"
+version = "0.1.0"
+source = "git+https://github.com/mozilla/application-services?rev=1c4dd52e61324eb124ba41cfbb56dcbc6b930d9f#1c4dd52e61324eb124ba41cfbb56dcbc6b930d9f"
+dependencies = [
+ "ffi-support",
+ "log",
+ "once_cell",
+ "prost",
+ "prost-derive",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "url",
+]
+
+[[package]]
 name = "viaduct-reqwest"
 version = "0.1.0"
 source = "git+https://github.com/mozilla/application-services?tag=v66.0.0#b7839356f2fe07dee03d593e9d9d12ae91b3e062"
@@ -1706,7 +1722,7 @@ dependencies = [
  "lazy_static",
  "log",
  "reqwest",
- "viaduct",
+ "viaduct 0.1.0 (git+https://github.com/mozilla/application-services?tag=v66.0.0)",
 ]
 
 [[package]]
