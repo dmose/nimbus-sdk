@@ -217,6 +217,14 @@ pub struct Experiment {
     // but we ignore them because they're for internal use by RemoteSettings.
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub enum FluentOrLiteralString {
+    Literal(String),
+    Fluent {string_id: String}
+}
+
+
 #[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct FeatureConfig {
