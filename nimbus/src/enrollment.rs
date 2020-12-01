@@ -4,7 +4,7 @@
 use crate::error::Result;
 use crate::evaluator::evaluate_enrollment;
 use crate::persistence::{Database, StoreId, Writer};
-use crate::{AppContext, AvailableRandomizationUnits, EnrolledExperiment, Experiment};
+use crate::{AppContext, AvailableRandomizationUnits, EnrolledExperiment, Experiment, FeatureConfig};
 
 use ::uuid::Uuid;
 use serde_derive::*;
@@ -33,6 +33,7 @@ pub enum EnrollmentStatus {
     Enrolled {
         reason: EnrolledReason,
         branch: String,
+        feature: Option<FeatureConfig>
     },
     // Not enrolled because our evaluator declined to choose us.
     NotSelected,
@@ -64,7 +65,7 @@ pub fn get_enrollments(db: &Database) -> Result<Vec<EnrolledExperiment>> {
     let mut result = Vec::with_capacity(enrollments.len());
     for enrollment in enrollments {
         log::debug!("Have enrollment: {:?}", enrollment);
-        if let EnrollmentStatus::Enrolled { ref branch, .. } = enrollment.status {
+        if let EnrollmentStatus::Enrolled { ref branch, ref feature, .. } = enrollment.status {
             if let Some(experiment) =
                 db.get::<Experiment>(StoreId::Experiments, &enrollment.slug)?
             {
@@ -73,6 +74,7 @@ pub fn get_enrollments(db: &Database) -> Result<Vec<EnrolledExperiment>> {
                     user_facing_name: experiment.user_facing_name,
                     user_facing_description: experiment.user_facing_description,
                     branch_slug: branch.to_string(),
+                    branch_feature: feature.clone(),
                 });
             } else {
                 log::warn!(
@@ -200,7 +202,8 @@ pub fn reset_enrollment(
     Ok(())
 }
 
-pub fn opt_in_with_branch(db: &Database, experiment_slug: &str, branch: &str) -> Result<()> {
+pub fn opt_in_with_branch(db: &Database, experiment_slug: &str, branch: &str,
+                         feature: Option<FeatureConfig> ) -> Result<()> {
     // For now we don't bother checking if the experiment or branch exist - if
     // they don't the enrollment will just be removed next time we refresh.
     let enrollment = ExperimentEnrollment {
@@ -208,6 +211,7 @@ pub fn opt_in_with_branch(db: &Database, experiment_slug: &str, branch: &str) ->
         status: EnrollmentStatus::Enrolled {
             reason: EnrolledReason::OptIn,
             branch: branch.to_string(),
+            feature: feature
         },
     };
     let mut writer = db.write()?;
@@ -391,7 +395,7 @@ mod tests {
         assert_eq!(ee.status, EnrollmentStatus::OptedOut);
 
         // Opt in to a specific branch.
-        opt_in_with_branch(&db, "secure-gold", "treatment")?;
+        opt_in_with_branch(&db, "secure-gold", "treatment", None)?;
         let enrollments = get_enrollments(&db)?;
         assert_eq!(enrollments.len(), 1);
         let enrollment = &enrollments[0];

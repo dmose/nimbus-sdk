@@ -72,9 +72,12 @@ pub fn evaluate_enrollment(
                     bucket_config.count,
                     bucket_config.total,
                 )? {
+                    let b: &Branch = choose_branch(&exp.slug, &exp.branches, &id)?;
+
                     EnrollmentStatus::Enrolled {
                         reason: EnrolledReason::Qualified,
-                        branch: choose_branch(&exp.slug, &exp.branches, &id)?.clone().slug,
+                        branch: b.clone().slug,
+                        feature: b.clone().feature
                     }
                 } else {
                     EnrollmentStatus::NotSelected

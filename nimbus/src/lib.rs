@@ -101,8 +101,9 @@ impl NimbusClient {
         self.db()?.collect_all(StoreId::Experiments)
     }
 
-    pub fn opt_in_with_branch(&self, experiment_slug: String, branch: String) -> Result<()> {
-        opt_in_with_branch(self.db()?, &experiment_slug, &branch)
+    pub fn opt_in_with_branch(&self, experiment_slug: String, branch: String,
+                              feature: Option<FeatureConfig>) -> Result<()> {
+        opt_in_with_branch(self.db()?, &experiment_slug, &branch, feature)
     }
 
     pub fn opt_out(&self, experiment_slug: String) -> Result<()> {
@@ -187,6 +188,7 @@ pub struct EnrolledExperiment {
     pub user_facing_name: String,
     pub user_facing_description: String,
     pub branch_slug: String,
+    pub branch_feature: Option<FeatureConfig>,
 }
 
 /// This is the currently supported major schema version.
@@ -217,7 +219,7 @@ pub struct Experiment {
     // but we ignore them because they're for internal use by RemoteSettings.
 }
 
-#[derive(Deserialize, Serialize, Debug, Default, Clone, PartialEq)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone, Hash, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct FeatureConfig {
     pub feature_id: String,

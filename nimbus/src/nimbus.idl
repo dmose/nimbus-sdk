@@ -13,11 +13,17 @@ dictionary AppContext {
     string? debug_tag;
 };
 
+dictionary FeatureConfig {
+    string feature_id;
+    boolean enabled;
+};
+
 dictionary EnrolledExperiment {
     string slug;
     string user_facing_name;
     string user_facing_description;
     string branch_slug;
+    FeatureConfig? branch_feature;
 };
 
 dictionary RemoteSettingsConfig {
@@ -85,7 +91,7 @@ interface NimbusClient {
     // Opt in to a specific branch on a specific experiment. Useful for
     // developers to test their app's interaction with the experiment.
     [Throws=Error]
-    void opt_in_with_branch(string experiment_slug, string branch);
+    void opt_in_with_branch(string experiment_slug, string branch, FeatureConfig? feature);
 
     // Opt out of a specific experiment.
     [Throws=Error]
